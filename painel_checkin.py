@@ -25,8 +25,14 @@ def limpar_cpf(cpf):
 @st.cache_data(ttl=10) # Atualiza a cada 10 segundos automaticamente
 def carregar_dados():
     try:
-        # DB 1: Lista base oficial de inscritos
-        df_inscritos = pd.read_csv("inscritos_base.csv", sep=None, engine='python')
+        # DB 1: Forçando a leitura com ponto e vírgula (Padrão Excel Brasil)
+        # on_bad_lines='skip' protege o sistema de quebrar se houver erro de digitação no Excel
+        try:
+            df_inscritos = pd.read_csv("inscritos_base.csv", sep=';', on_bad_lines='skip')
+        except Exception:
+            # Plano B: Se alguém salvar com vírgula no futuro, ele tenta ler de novo
+            df_inscritos = pd.read_csv("inscritos_base.csv", sep=',', on_bad_lines='skip')
+            
         colunas_cpf_locais = [col for col in df_inscritos.columns if 'cpf' in col.lower()]
         
         if not colunas_cpf_locais:
