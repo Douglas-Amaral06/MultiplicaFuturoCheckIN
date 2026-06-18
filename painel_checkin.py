@@ -399,6 +399,16 @@ st.markdown(f"""
         filter: drop-shadow(0 0 6px rgba(0, 229, 255, 0.8)) drop-shadow(0 0 12px rgba(0, 229, 255, 0.4));
     }}
 
+    /* NOVO: SVG do footer com cor dinâmica no hover */
+    .footer-icon svg {{
+        stroke: #8B9BB4;
+        transition: all 0.3s ease;
+    }}
+
+    .footer-link:hover .footer-icon svg {{
+        stroke: #00E5FF;
+    }}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -643,25 +653,25 @@ else:
 st.markdown("---")
 
 # NOVO: FOOTER - Rodapé com links de Instagram e SVG inline
-instagram_svg = """
-<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-    <circle cx="17.5" cy="6.5" r="1.5"></circle>
-</svg>
-"""
-
-footer_html = f"""
+footer_html = """
 <div class="footer-container">
     <a href="https://www.instagram.com/multiplicafuturo/" target="_blank" class="footer-link">
-        <div class="footer-icon" style="color: #8B9BB4;">
-            {instagram_svg}
+        <div class="footer-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                <circle cx="17.5" cy="6.5" r="1.5"></circle>
+            </svg>
         </div>
         <span>Siga-nos: Instagram Multiplica</span>
     </a>
     <a href="https://www.instagram.com/__dg.amaral06/" target="_blank" class="footer-link">
-        <div class="footer-icon" style="color: #8B9BB4;">
-            {instagram_svg}
+        <div class="footer-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                <circle cx="17.5" cy="6.5" r="1.5"></circle>
+            </svg>
         </div>
         <span>Instagram do Desenvolvedor: @__dg.amaral06</span>
     </a>
