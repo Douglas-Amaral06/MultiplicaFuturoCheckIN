@@ -73,7 +73,7 @@ st.markdown("""
 
 # Header Estilizado
 st.markdown("<h1 class='main-title'>Painel de Recepção</h1>", unsafe_allow_html=True)
-st.markdown("<h3 class='sub-title'>🚀 Multiplica do Futuro - Renapsi</h3>", unsafe_allow_html=True)
+st.markdown("<h3 class='sub-title'>🚀 Multiplica do Futuro - Demà Renapsi</h3>", unsafe_allow_html=True)
 
 
 # ID capturado da planilha oficial de respostas do evento
