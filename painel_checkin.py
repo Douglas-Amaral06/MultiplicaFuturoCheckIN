@@ -4,6 +4,9 @@ import re
 import plotly.graph_objects as go
 import base64
 import os
+from datetime import datetime
+# NOVO: FEATURE 2 - Imports para efeitos sonoros
+import time
 
 # ==========================================
 # 1. CONFIGURAÇÕES DA PÁGINA & BRANDING (FRONT-END EXTREME SUPREME)
@@ -207,6 +210,117 @@ st.markdown(f"""
         color: #00E5FF !important;
         background: rgba(0, 229, 255, 0.05) !important;
     }}
+
+    /* ========================================= */
+    /* NOVO: FEATURE 1 - Relógio Digital em Tempo Real */
+    /* ========================================= */
+    .digital-clock {{
+        font-family: 'Rajdhani', monospace;
+        font-size: 2.2rem;
+        color: #00E5FF;
+        font-weight: 700;
+        text-shadow: 0 0 10px rgba(0, 229, 255, 0.5), 0 0 20px rgba(0, 229, 255, 0.3);
+        text-align: center;
+        padding: 15px 30px;
+        background: rgba(0, 229, 255, 0.05);
+        border: 1px solid rgba(0, 229, 255, 0.2);
+        border-radius: 12px;
+        animation: clockGlow 2s ease-in-out infinite;
+        margin-bottom: 15px;
+        letter-spacing: 3px;
+    }}
+
+    @keyframes clockGlow {{
+        0%, 100% {{ text-shadow: 0 0 10px rgba(0, 229, 255, 0.5), 0 0 20px rgba(0, 229, 255, 0.3); }}
+        50% {{ text-shadow: 0 0 15px rgba(0, 229, 255, 0.8), 0 0 30px rgba(0, 229, 255, 0.5); }}
+    }}
+
+    .scanning-status {{
+        font-family: 'Rajdhani', monospace;
+        font-size: 0.95rem;
+        color: #00E5FF;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        animation: scanning 1.5s ease-in-out infinite;
+    }}
+
+    @keyframes scanning {{
+        0% {{ opacity: 0.5; }}
+        50% {{ opacity: 1; }}
+        100% {{ opacity: 0.5; }}
+    }}
+
+    /* ========================================= */
+    /* NOVO: FEATURE 3 - Tooltips nos Cards */
+    /* ========================================= */
+    .metric-card[title] {{
+        cursor: help;
+    }}
+
+    .tooltip-custom {{
+        position: relative;
+    }}
+
+    .tooltip-custom:hover::after {{
+        content: attr(data-tooltip);
+        position: absolute;
+        bottom: 110%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0, 0, 0, 0.9);
+        color: #00E5FF;
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        white-space: nowrap;
+        z-index: 1000;
+        border: 1px solid rgba(0, 229, 255, 0.3);
+        font-family: 'Poppins', sans-serif;
+        pointer-events: none;
+    }}
+
+    /* ========================================= */
+    /* NOVO: FEATURE 4 - Animação de Entrada (Fade-In e Slide-Up) */
+    /* ========================================= */
+    @keyframes fadeInSlideUp {{
+        from {{
+            opacity: 0;
+            transform: translateY(30px);
+        }}
+        to {{
+            opacity: 1;
+            transform: translateY(0);
+        }}
+    }}
+
+    .data-table {{
+        animation: fadeInSlideUp 0.8s ease-out forwards;
+    }}
+
+    .plotly-chart {{
+        animation: fadeInSlideUp 1s ease-out forwards;
+    }}
+
+    /* ========================================= */
+    /* NOVO: FEATURE 5 - Efeito Data Matrix no Background dos Cards */
+    /* ========================================= */
+    .metric-card {{
+        background-image: 
+            linear-gradient(0deg, transparent 24%, rgba(0, 229, 255, 0.03) 25%, rgba(0, 229, 255, 0.03) 26%, transparent 27%, transparent 74%, rgba(0, 229, 255, 0.03) 75%, rgba(0, 229, 255, 0.03) 76%, transparent 77%, transparent),
+            linear-gradient(90deg, transparent 24%, rgba(0, 229, 255, 0.03) 25%, rgba(0, 229, 255, 0.03) 26%, transparent 27%, transparent 74%, rgba(0, 229, 255, 0.03) 75%, rgba(0, 229, 255, 0.03) 76%, transparent 77%, transparent);
+        background-size: 60px 60px;
+        background-position: 0 0;
+        opacity: 1;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }}
+
+    .metric-card:hover {{
+        background-image: 
+            linear-gradient(0deg, transparent 24%, rgba(0, 229, 255, 0.08) 25%, rgba(0, 229, 255, 0.08) 26%, transparent 27%, transparent 74%, rgba(0, 229, 255, 0.08) 75%, rgba(0, 229, 255, 0.08) 76%, transparent 77%, transparent),
+            linear-gradient(90deg, transparent 24%, rgba(0, 229, 255, 0.08) 25%, rgba(0, 229, 255, 0.08) 26%, transparent 27%, transparent 74%, rgba(0, 229, 255, 0.08) 75%, rgba(0, 229, 255, 0.08) 76%, transparent 77%, transparent);
+        background-size: 60px 60px;
+    }}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -220,6 +334,23 @@ st.markdown(f"""
             <h3 class='sub-title'>Multiplica do Futuro</h3>
         </div>
     </div>
+""", unsafe_allow_html=True)
+
+# NOVO: FEATURE 1 - Relógio Digital em Tempo Real + Status Scanning
+st.markdown("""
+<div class="digital-clock" id="live-clock">⏱️ 00:00:00</div>
+<div class="scanning-status">🔴 ● ● ● SCANNING... LIVE ● ● ●</div>
+<script>
+function updateClock() {
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    document.getElementById('live-clock').textContent = hours + ':' + minutes + ':' + seconds;
+}
+updateClock();
+setInterval(updateClock, 1000);
+</script>
 """, unsafe_allow_html=True)
 
 
@@ -273,6 +404,13 @@ def carregar_dados():
 # ==========================================
 df_total, total_inscritos = carregar_dados()
 
+# NOVO: FEATURE 2 - Controle de Áudio para Notificação de Check-in
+if 'ultima_verificacao' not in st.session_state:
+    st.session_state.ultima_verificacao = len(df_total)
+
+novos_checkins = len(df_total) - st.session_state.ultima_verificacao
+st.session_state.ultima_verificacao = len(df_total)
+
 if 'Status' in df_total.columns:
     lista_presenca = df_total[df_total['Status'] == True]
     lista_convidados = df_total[df_total['Status'] == False] 
@@ -304,18 +442,25 @@ if 'Status' in df_total.columns:
                 </div>
             </div>
             <div style="display: flex; gap: 20px;">
-                <div class="metric-card success" style="flex: 1;">
+                <div class="metric-card success" style="flex: 1;" title="Sincronizado diretamente com a roleta principal">
                     <p class="metric-value" style="color: #39FF14;">{qtd_presentes}</p>
                     <p class="metric-label">✅ Confirmados</p>
                 </div>
-                <div class="metric-card warning" style="flex: 1;">
+                <div class="metric-card warning" style="flex: 1;" title="Pessoas sem registro anterior na base de dados">
                     <p class="metric-value" style="color: #FF8C00;">{qtd_convidados}</p>
                     <p class="metric-label">⚠️ Convidados Extras</p>
                 </div>
             </div>
         """, unsafe_allow_html=True)
-    
-    with col_chart:
+        
+        # NOVO: FEATURE 2 - Reproduzir som se houver novos check-ins
+        if novos_checkins > 0:
+            st.markdown("""
+            <audio autoplay style="display:none;">
+                <source src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" type="audio/mpeg">
+            </audio>
+            """, unsafe_allow_html=True)
+        
         # Paleta de Cores Atualizada para o Tema Neon
         labels = ['Inscritos Presentes', 'Inscritos Ausentes', 'Convidados Extras']
         valores = [qtd_presentes, qtd_ausentes, qtd_convidados]
@@ -339,7 +484,10 @@ if 'Status' in df_total.columns:
             margin=dict(t=10, b=10, l=10, r=10),
             height=340
         )
+        # NOVO: FEATURE 4 - Animação de entrada do gráfico
+        st.markdown('<div class="plotly-chart">', unsafe_allow_html=True)
         st.plotly_chart(fig, use_container_width=True)
+        st.markdown('</div>', unsafe_allow_html=True)
         
     st.markdown("---") 
     
@@ -350,18 +498,24 @@ if 'Status' in df_total.columns:
     with col_esquerda:
         st.markdown(f"<h3 style='color: #39FF14; font-family: Poppins; text-shadow: 0 0 10px rgba(57,255,20,0.3);'>✅ Lista de Presença ({qtd_presentes})</h3>", unsafe_allow_html=True)
         st.caption("Fluxo de entrada em tempo real")
+        # NOVO: FEATURE 4 - Animação de entrada para tabela de presença
+        st.markdown('<div class="data-table">', unsafe_allow_html=True)
         try:
             st.dataframe(lista_presenca[colunas_exibicao], use_container_width=True, hide_index=True)
         except KeyError:
             st.dataframe(lista_presenca, use_container_width=True, hide_index=True) # #OdiamosJava 
+        st.markdown('</div>', unsafe_allow_html=True)
         
     with col_direita:
         st.markdown(f"<h3 style='color: #FF8C00; font-family: Poppins; text-shadow: 0 0 10px rgba(255,140,0,0.3);'>⚠️ Convidados Extras ({qtd_convidados})</h3>", unsafe_allow_html=True)
         st.caption("Pessoas pendentes de validação manual")
+        # NOVO: FEATURE 4 - Animação de entrada para tabela de convidados
+        st.markdown('<div class="data-table">', unsafe_allow_html=True)
         try:
             st.dataframe(lista_convidados[colunas_exibicao], use_container_width=True, hide_index=True)
         except KeyError:
             st.dataframe(lista_convidados, use_container_width=True, hide_index=True)
+        st.markdown('</div>', unsafe_allow_html=True)
         
     # ==========================================
     # 4. PAINEL DE CONTROLE (BOTÕES)
