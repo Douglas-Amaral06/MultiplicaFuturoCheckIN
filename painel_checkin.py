@@ -143,10 +143,48 @@ if 'Status' in df_total.columns:
         except KeyError:
             st.dataframe(lista_convidados, use_container_width=True, hide_index=True)
         
-    # Botão de atualização manual
-    st.write("")
-    if st.button("🔄 Atualizar Painel Agora"):
-        st.cache_data.clear()
-        st.rerun()
+    # ==========================================
+    # 4. PAINEL DE CONTROLE (BOTÕES)
+    # ==========================================
+    st.markdown("---")
+    
+    # Criamos 3 colunas para deixar os botões alinhados e bonitos no rodapé
+    col_btn1, col_btn2, col_btn3 = st.columns(3)
+    
+    with col_btn1:
+        if st.button("🔄 Atualizar Painel Agora", use_container_width=True):
+            st.cache_data.clear()
+            st.rerun()
+            
+    with col_btn2:
+        # Prepara o CSV da Lista de Presença (padrão Excel Brasil: sep=';', encoding='utf-8-sig')
+        try:
+            csv_presenca = lista_presenca[colunas_exibicao].to_csv(index=False, sep=';', encoding='utf-8-sig')
+        except KeyError:
+            csv_presenca = lista_presenca.to_csv(index=False, sep=';', encoding='utf-8-sig')
+            
+        st.download_button(
+            label="📥 Baixar Lista de Presença (CSV)",
+            data=csv_presenca,
+            file_name='checkin_presenca_multiplica.csv',
+            mime='text/csv',
+            use_container_width=True
+        )
+        
+    with col_btn3:
+        # Prepara o CSV da Lista de Convidados
+        try:
+            csv_convidados = lista_convidados[colunas_exibicao].to_csv(index=False, sep=';', encoding='utf-8-sig')
+        except KeyError:
+            csv_convidados = lista_convidados.to_csv(index=False, sep=';', encoding='utf-8-sig')
+            
+        st.download_button(
+            label="📥 Baixar Convidados Extras (CSV)",
+            data=csv_convidados,
+            file_name='checkin_convidados_multiplica.csv',
+            mime='text/csv',
+            use_container_width=True
+        )
+
 else:
     st.info("🔄 Conectando com o banco de dados... Aguardando os primeiros check-ins.")
