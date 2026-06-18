@@ -212,43 +212,74 @@ st.markdown(f"""
     }}
 
     /* ========================================= */
-    /* NOVO: FEATURE 1 - Relógio Digital em Tempo Real */
+    /* NOVO: FEATURE 1 - Barra de Busca Terminal Command */
     /* ========================================= */
-    .digital-clock {{
+    .terminal-search {{
         font-family: 'Rajdhani', monospace;
-        font-size: 2.2rem;
-        color: #00E5FF;
-        font-weight: 700;
-        text-shadow: 0 0 10px rgba(0, 229, 255, 0.5), 0 0 20px rgba(0, 229, 255, 0.3);
-        text-align: center;
-        padding: 15px 30px;
-        background: rgba(0, 229, 255, 0.05);
-        border: 1px solid rgba(0, 229, 255, 0.2);
-        border-radius: 12px;
-        animation: clockGlow 2s ease-in-out infinite;
-        margin-bottom: 15px;
-        letter-spacing: 3px;
+        background: rgba(5, 8, 16, 0.8) !important;
+        border: 1px solid rgba(0, 229, 255, 0.5) !important;
+        border-radius: 6px !important;
+        padding: 12px 16px !important;
+        color: #00E5FF !important;
+        font-size: 1rem !important;
+        font-weight: 600 !important;
+        letter-spacing: 1px !important;
+        box-shadow: inset 0 0 10px rgba(0, 229, 255, 0.1), 0 0 15px rgba(0, 229, 255, 0.2) !important;
+        transition: all 0.3s ease !important;
     }}
 
-    @keyframes clockGlow {{
-        0%, 100% {{ text-shadow: 0 0 10px rgba(0, 229, 255, 0.5), 0 0 20px rgba(0, 229, 255, 0.3); }}
-        50% {{ text-shadow: 0 0 15px rgba(0, 229, 255, 0.8), 0 0 30px rgba(0, 229, 255, 0.5); }}
+    .terminal-search:focus {{
+        outline: none !important;
+        border-color: #00E5FF !important;
+        box-shadow: inset 0 0 15px rgba(0, 229, 255, 0.2), 0 0 25px rgba(0, 229, 255, 0.4) !important;
+        text-shadow: 0 0 10px rgba(0, 229, 255, 0.5) !important;
     }}
 
-    .scanning-status {{
-        font-family: 'Rajdhani', monospace;
-        font-size: 0.95rem;
-        color: #00E5FF;
-        letter-spacing: 2px;
-        text-transform: uppercase;
-        animation: scanning 1.5s ease-in-out infinite;
+    .terminal-search::placeholder {{
+        color: rgba(0, 229, 255, 0.4) !important;
     }}
 
-    @keyframes scanning {{
-        0% {{ opacity: 0.5; }}
-        50% {{ opacity: 1; }}
-        100% {{ opacity: 0.5; }}
+    /* ========================================= */
+    /* NOVO: FEATURE 3 - Partículas Cyber-Dust (Scanlines) */
+    /* ========================================= */
+    .stApp::after {{
+        content: "";
+        position: fixed;
+        top: 0; left: 0; width: 100vw; height: 100vh;
+        pointer-events: none;
+        background: repeating-linear-gradient(
+            0deg,
+            transparent,
+            transparent 2px,
+            rgba(0, 229, 255, 0.02) 2px,
+            rgba(0, 229, 255, 0.02) 4px
+        );
+        animation: scanlineScroll 8s linear infinite;
+        z-index: 1;
     }}
+
+    @keyframes scanlineScroll {{
+        0% {{
+            transform: translateY(-100%);
+        }}
+        100% {{
+            transform: translateY(100vh);
+        }}
+    }}
+
+    /* Efeito de poeira digital sutil */
+    .stApp {{
+        background-image: 
+            radial-gradient(2px 2px at 20px 30px, rgba(0, 229, 255, 0.015), transparent),
+            radial-gradient(2px 2px at 60px 70px, rgba(0, 229, 255, 0.015), transparent),
+            radial-gradient(1px 1px at 50px 50px, rgba(0, 229, 255, 0.01), transparent),
+            radial-gradient(1px 1px at 130px 80px, rgba(0, 229, 255, 0.01), transparent),
+            radial-gradient(2px 2px at 90px 10px, rgba(0, 229, 255, 0.015), transparent);
+        background-size: 200px 200px;
+        background-attachment: fixed;
+    }}
+
+
 
     /* ========================================= */
     /* NOVO: FEATURE 3 - Tooltips nos Cards */
@@ -336,23 +367,6 @@ st.markdown(f"""
     </div>
 """, unsafe_allow_html=True)
 
-# NOVO: FEATURE 1 - Relógio Digital em Tempo Real + Status Scanning
-st.markdown("""
-<div class="digital-clock" id="live-clock">⏱️ 00:00:00</div>
-<div class="scanning-status">🔴 ● ● ● SCANNING... LIVE ● ● ●</div>
-<script>
-function updateClock() {
-    const now = new Date();
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    const seconds = String(now.getSeconds()).padStart(2, '0');
-    document.getElementById('live-clock').textContent = hours + ':' + minutes + ':' + seconds;
-}
-updateClock();
-setInterval(updateClock, 1000);
-</script>
-""", unsafe_allow_html=True)
-
 
 # ID capturado da planilha oficial de respostas do evento
 SHEET_ID = "1JLBii5KIj6SzkZF7T2Lgr-Bc9nMMbtf1haygbn6w-lw"
@@ -404,12 +418,13 @@ def carregar_dados():
 # ==========================================
 df_total, total_inscritos = carregar_dados()
 
-# NOVO: FEATURE 2 - Controle de Áudio para Notificação de Check-in
-if 'ultima_verificacao' not in st.session_state:
-    st.session_state.ultima_verificacao = len(df_total)
+# NOVO: FEATURE 2 - Notificações Flutuantes (Toast) de Novo Check-in
+if 'ultima_contagem_df' not in st.session_state:
+    st.session_state.ultima_contagem_df = len(df_total)
 
-novos_checkins = len(df_total) - st.session_state.ultima_verificacao
-st.session_state.ultima_verificacao = len(df_total)
+if len(df_total) > st.session_state.ultima_contagem_df:
+    st.toast("🔔 Novo check-in detectado na roleta!", icon="✅")
+    st.session_state.ultima_contagem_df = len(df_total)
 
 if 'Status' in df_total.columns:
     lista_presenca = df_total[df_total['Status'] == True]
@@ -425,10 +440,10 @@ if 'Status' in df_total.columns:
     
     st.write("")
     
-    # Grid Superior: Cards HTML Animados + Gráfico
-    col_metrics, col_chart = st.columns([1.3, 1])
+    # NOVO: FEATURE 1 - Centralizar os cards removendo layout lateral vazio
+    col_metrics_centered = st.columns([1])[0]
     
-    with col_metrics:
+    with col_metrics_centered:
         st.write("")
         st.markdown(f"""
             <div style="display: flex; gap: 20px; margin-bottom: 20px;">
@@ -452,14 +467,6 @@ if 'Status' in df_total.columns:
                 </div>
             </div>
         """, unsafe_allow_html=True)
-        
-        # NOVO: FEATURE 2 - Reproduzir som se houver novos check-ins
-        if novos_checkins > 0:
-            st.markdown("""
-            <audio autoplay style="display:none;">
-                <source src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" type="audio/mpeg">
-            </audio>
-            """, unsafe_allow_html=True)
         
         # Paleta de Cores Atualizada para o Tema Neon
         labels = ['Inscritos Presentes', 'Inscritos Ausentes', 'Convidados Extras']
@@ -491,30 +498,53 @@ if 'Status' in df_total.columns:
         
     st.markdown("---") 
     
+    # NOVO: FEATURE 1 - Barra de Busca Estilo Terminal Command
+    busca_termo = st.text_input(
+        "🔍 BUSCAR",
+        placeholder="$ Digite nome ou CPF para filtrar...",
+        key="terminal_search",
+        help="Digite o nome completo ou CPF da pessoa"
+    )
+    st.markdown('<style> input { font-family: "Rajdhani", monospace !important; } </style>', unsafe_allow_html=True)
+    
     # Tabelas de Visualização
     col_esquerda, col_direita = st.columns(2)
     colunas_exibicao = ['Carimbo de data/hora', 'Qual é seu nome completo?', 'Qual é seu CPF?']
     
+    # NOVO: FEATURE 1 - Aplicar filtro de busca nos dados
+    if busca_termo:
+        lista_presenca_filtrada = lista_presenca[
+            (lista_presenca['Qual é seu nome completo?'].str.contains(busca_termo, case=False, na=False)) |
+            (lista_presenca['Qual é seu CPF?'].astype(str).str.contains(busca_termo, case=False, na=False))
+        ]
+        lista_convidados_filtrada = lista_convidados[
+            (lista_convidados['Qual é seu nome completo?'].str.contains(busca_termo, case=False, na=False)) |
+            (lista_convidados['Qual é seu CPF?'].astype(str).str.contains(busca_termo, case=False, na=False))
+        ]
+    else:
+        lista_presenca_filtrada = lista_presenca
+        lista_convidados_filtrada = lista_convidados
+    
     with col_esquerda:
-        st.markdown(f"<h3 style='color: #39FF14; font-family: Poppins; text-shadow: 0 0 10px rgba(57,255,20,0.3);'>✅ Lista de Presença ({qtd_presentes})</h3>", unsafe_allow_html=True)
+        st.markdown(f"<h3 style='color: #39FF14; font-family: Poppins; text-shadow: 0 0 10px rgba(57,255,20,0.3);'>✅ Lista de Presença ({len(lista_presenca_filtrada)})</h3>", unsafe_allow_html=True)
         st.caption("Fluxo de entrada em tempo real")
         # NOVO: FEATURE 4 - Animação de entrada para tabela de presença
         st.markdown('<div class="data-table">', unsafe_allow_html=True)
         try:
-            st.dataframe(lista_presenca[colunas_exibicao], use_container_width=True, hide_index=True)
+            st.dataframe(lista_presenca_filtrada[colunas_exibicao], use_container_width=True, hide_index=True)
         except KeyError:
-            st.dataframe(lista_presenca, use_container_width=True, hide_index=True) # #OdiamosJava 
+            st.dataframe(lista_presenca_filtrada, use_container_width=True, hide_index=True) # #OdiamosJava 
         st.markdown('</div>', unsafe_allow_html=True)
         
     with col_direita:
-        st.markdown(f"<h3 style='color: #FF8C00; font-family: Poppins; text-shadow: 0 0 10px rgba(255,140,0,0.3);'>⚠️ Convidados Extras ({qtd_convidados})</h3>", unsafe_allow_html=True)
+        st.markdown(f"<h3 style='color: #FF8C00; font-family: Poppins; text-shadow: 0 0 10px rgba(255,140,0,0.3);'>⚠️ Convidados Extras ({len(lista_convidados_filtrada)})</h3>", unsafe_allow_html=True)
         st.caption("Pessoas pendentes de validação manual")
         # NOVO: FEATURE 4 - Animação de entrada para tabela de convidados
         st.markdown('<div class="data-table">', unsafe_allow_html=True)
         try:
-            st.dataframe(lista_convidados[colunas_exibicao], use_container_width=True, hide_index=True)
+            st.dataframe(lista_convidados_filtrada[colunas_exibicao], use_container_width=True, hide_index=True)
         except KeyError:
-            st.dataframe(lista_convidados, use_container_width=True, hide_index=True)
+            st.dataframe(lista_convidados_filtrada, use_container_width=True, hide_index=True)
         st.markdown('</div>', unsafe_allow_html=True)
         
     # ==========================================
