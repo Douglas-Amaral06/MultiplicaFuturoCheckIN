@@ -2,51 +2,110 @@ import streamlit as st
 import pandas as pd
 import re
 import plotly.graph_objects as go
+import base64
+import os
 
 # ==========================================
 # 1. CONFIGURAÇÕES DA PÁGINA & BRANDING (FRONT-END EXTREME)
 # ==========================================
 st.set_page_config(page_title="Multiplica do Futuro - Check-in", page_icon="🚀", layout="wide")
 
-# CSS Customizado (Tema Dark Institucional - Renapsi Vibe + Animações)
-st.markdown("""
-<style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap');
+# Função para converter imagem em base64 (necessário para Background CSS)
+def get_base64_of_bin_file(bin_file):
+    try:
+        with open(bin_file, 'rb') as f:
+            data = f.read()
+        return base64.b64encode(data).decode()
+    except FileNotFoundError:
+        return ""
 
-    /* Fundo da tela principal */
+# Tenta carregar o logo do ministério para o background
+bg_img_b64 = get_base64_of_bin_file("logo_ministerio_1@4x.png")
+
+# Monta o CSS do background condicionalmente
+background_css = ""
+if bg_img_b64:
+    background_css = f"""
+    .stApp {{
+        background-color: #0B0E14;
+        background-image: url("data:image/png;base64,{bg_img_b64}");
+        background-position: right bottom;
+        background-repeat: no-repeat;
+        background-size: 35vw; /* Ajusta o tamanho da marca d'água */
+        background-attachment: fixed;
+    }}
+    /* Cria uma camada escura por cima da imagem para não atrapalhar a leitura */
+    .stApp::before {{
+        content: "";
+        position: fixed;
+        top: 0; left: 0; width: 100vw; height: 100vh;
+        background: rgba(11, 14, 20, 0.85); /* Fundo escuro semi-transparente */
+        z-index: -1;
+    }}
+    """
+else:
+    background_css = """
     .stApp {
         background-color: #0B0E14; 
     }
+    """
+
+# CSS Customizado Geral
+st.markdown(f"""
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap');
+
+    {background_css}
     
+    /* Layout para colocar a logo SVG no topo esquerdo ao lado do título */
+    .header-container {{
+        display: flex;
+        align-items: center;
+        justify-content: center; /* Centraliza o conteúdo geral */
+        position: relative;
+        margin-bottom: 0px;
+        padding-top: 10px;
+    }}
+    
+    .top-left-logo {{
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 200px; /* Tamanho da logo SVG */
+    }}
+    
+    .title-wrapper {{
+        text-align: center;
+    }}
+
     /* Título Principal */
-    .main-title {
+    .main-title {{
         font-family: 'Poppins', sans-serif;
         color: #FFFFFF;
-        text-align: center;
         font-size: 3.2rem;
         font-weight: 800;
         margin-bottom: 0px;
         padding-bottom: 0px;
         letter-spacing: -1px;
         text-shadow: 0px 4px 20px rgba(74, 144, 226, 0.4);
-    }
+    }}
     
     /* Subtítulo */
-    .sub-title {
+    .sub-title {{
         font-family: 'Poppins', sans-serif;
         color: #4A90E2; 
-        text-align: center;
         font-size: 1.2rem;
         font-weight: 600;
         margin-top: -5px;
         margin-bottom: 40px;
         letter-spacing: 3px;
         text-transform: uppercase;
-    }
+    }}
     
     /* Cards de Métricas Customizados - Base */
-    .metric-card {
-        background: linear-gradient(145deg, #161925, #11141D);
+    .metric-card {{
+        background: linear-gradient(145deg, rgba(22, 25, 37, 0.9), rgba(17, 20, 29, 0.9)); /* Levemente transparente */
+        backdrop-filter: blur(10px);
         border-radius: 16px;
         padding: 25px 20px;
         text-align: center;
@@ -55,31 +114,31 @@ st.markdown("""
         transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
         margin-bottom: 15px;
         border-top: 1px solid rgba(255,255,255,0.05);
-    }
+    }}
     
-    /* Hover Effects dos Cards (A mágica acontece aqui) */
-    .metric-card:hover {
+    /* Hover Effects dos Cards */
+    .metric-card:hover {{
         transform: translateY(-8px) scale(1.02);
         box-shadow: 0 15px 30px rgba(74, 144, 226, 0.2);
-    }
+    }}
     
-    .metric-card.success { border-bottom-color: #2ECC71; }
-    .metric-card.success:hover { box-shadow: 0 15px 30px rgba(46, 204, 113, 0.2); }
+    .metric-card.success {{ border-bottom-color: #2ECC71; }}
+    .metric-card.success:hover {{ box-shadow: 0 15px 30px rgba(46, 204, 113, 0.2); }}
     
-    .metric-card.warning { border-bottom-color: #F39C12; }
-    .metric-card.warning:hover { box-shadow: 0 15px 30px rgba(243, 156, 18, 0.2); }
+    .metric-card.warning {{ border-bottom-color: #F39C12; }}
+    .metric-card.warning:hover {{ box-shadow: 0 15px 30px rgba(243, 156, 18, 0.2); }}
     
     /* Tipografia dos Cards */
-    .metric-value {
+    .metric-value {{
         font-family: 'Poppins', sans-serif;
         font-size: 3rem;
         font-weight: 800;
         color: #FFFFFF;
         margin: 0;
         line-height: 1.1;
-    }
+    }}
     
-    .metric-label {
+    .metric-label {{
         font-family: 'Poppins', sans-serif;
         font-size: 0.95rem;
         color: #8B9BB4;
@@ -87,29 +146,41 @@ st.markdown("""
         letter-spacing: 1.5px;
         font-weight: 600;
         margin: 10px 0 0 0;
-    }
+    }}
 
-    /* Hack para animar os botões nativos do Streamlit */
-    div[data-testid="stButton"] button, div[data-testid="stDownloadButton"] button {
+    /* Hack para animar os botões nativos */
+    div[data-testid="stButton"] button, div[data-testid="stDownloadButton"] button {{
         transition: all 0.3s ease !important;
         border-radius: 10px !important;
         border: 1px solid rgba(74, 144, 226, 0.5) !important;
         font-family: 'Poppins', sans-serif !important;
         font-weight: 600 !important;
-    }
+        background-color: rgba(26, 28, 35, 0.8) !important; /* Fundo semi-transparente para combinar com a marca d'água */
+    }}
     
-    div[data-testid="stButton"] button:hover, div[data-testid="stDownloadButton"] button:hover {
+    div[data-testid="stButton"] button:hover, div[data-testid="stDownloadButton"] button:hover {{
         transform: translateY(-3px) !important;
         box-shadow: 0 8px 20px rgba(74, 144, 226, 0.3) !important;
         border-color: #4A90E2 !important;
         color: #4A90E2 !important;
-    }
+    }}
 </style>
 """, unsafe_allow_html=True)
 
-# Header Estilizado
-st.markdown("<h1 class='main-title'>Painel de Recepção</h1>", unsafe_allow_html=True)
-st.markdown("<h3 class='sub-title'>🚀 Multiplica do Futuro - Demà Renapsi</h3>", unsafe_allow_html=True)
+# Tenta carregar o logo SVG para o topo esquerdo
+logo_svg_b64 = get_base64_of_bin_file("vermelho_horiz.svg")
+img_tag = f'<img src="data:image/svg+xml;base64,{logo_svg_b64}" class="top-left-logo">' if logo_svg_b64 else ''
+
+# Renderiza o Header
+st.markdown(f"""
+    <div class="header-container">
+        {img_tag}
+        <div class="title-wrapper">
+            <h1 class='main-title'>Painel de Recepção</h1>
+            <h3 class='sub-title'>🚀 Multiplica do Futuro - Demà Renapsi</h3>
+        </div>
+    </div>
+""", unsafe_allow_html=True)
 
 # ID capturado da planilha oficial de respostas do evento
 SHEET_ID = "1JLBii5KIj6SzkZF7T2Lgr-Bc9nMMbtf1haygbn6w-lw"
@@ -215,7 +286,7 @@ if 'Status' in df_total.columns:
             labels=labels, 
             values=valores, 
             hole=.65,
-            marker=dict(colors=cores, line=dict(color='#0B0E14', width=3)), # Bordas mais grossas combinando com o fundo
+            marker=dict(colors=cores, line=dict(color='#0B0E14', width=3)), 
             textinfo='percent',
             textfont=dict(color='white', size=15, family='Poppins')
         )])
@@ -231,7 +302,7 @@ if 'Status' in df_total.columns:
         )
         st.plotly_chart(fig, use_container_width=True)
         
-    st.markdown("---")
+    st.markdown("---") 
     
     # Tabelas de Visualização
     col_esquerda, col_direita = st.columns(2)
@@ -243,7 +314,7 @@ if 'Status' in df_total.columns:
         try:
             st.dataframe(lista_presenca[colunas_exibicao], use_container_width=True, hide_index=True)
         except KeyError:
-            st.dataframe(lista_presenca, use_container_width=True, hide_index=True) # #OdiamosJava
+            st.dataframe(lista_presenca, use_container_width=True, hide_index=True) 
         
     with col_direita:
         st.markdown(f"<h3 style='color: #F39C12; font-family: Poppins;'>⚠️ Convidados ({qtd_convidados})</h3>", unsafe_allow_html=True)
