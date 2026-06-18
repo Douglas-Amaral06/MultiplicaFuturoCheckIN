@@ -352,6 +352,53 @@ st.markdown(f"""
         background-size: 60px 60px;
     }}
 
+    /* ========================================= */
+    /* NOVO: FOOTER - Rodapé Customizado com Links e SVG */
+    /* ========================================= */
+    .footer-container {{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 40px;
+        flex-wrap: wrap;
+        margin-top: 40px;
+        padding: 30px 20px;
+        background: rgba(10, 15, 30, 0.4);
+        border-top: 1px solid rgba(0, 229, 255, 0.2);
+        border-radius: 12px;
+        backdrop-filter: blur(10px);
+    }}
+
+    .footer-link {{
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        text-decoration: none;
+        color: #8B9BB4;
+        font-family: 'Poppins', sans-serif;
+        font-size: 0.95rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }}
+
+    .footer-link:hover {{
+        color: #00E5FF;
+        text-shadow: 0 0 10px rgba(0, 229, 255, 0.6), 0 0 20px rgba(0, 229, 255, 0.3);
+    }}
+
+    .footer-icon {{
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }}
+
+    .footer-link:hover .footer-icon {{
+        filter: drop-shadow(0 0 6px rgba(0, 229, 255, 0.8)) drop-shadow(0 0 12px rgba(0, 229, 255, 0.4));
+    }}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -589,3 +636,36 @@ if 'Status' in df_total.columns:
 
 else:
     st.info("🔄 Inicializando sistemas... Aguardando conexão de dados da roleta.")
+
+# ==========================================
+# 5. FOOTER (RODAPÉ)
+# ==========================================
+st.markdown("---")
+
+# NOVO: FOOTER - Rodapé com links de Instagram e SVG inline
+instagram_svg = """
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+    <circle cx="17.5" cy="6.5" r="1.5"></circle>
+</svg>
+"""
+
+footer_html = f"""
+<div class="footer-container">
+    <a href="https://www.instagram.com/multiplicafuturo/" target="_blank" class="footer-link">
+        <div class="footer-icon" style="color: #8B9BB4;">
+            {instagram_svg}
+        </div>
+        <span>Siga-nos: Instagram Multiplica</span>
+    </a>
+    <a href="https://www.instagram.com/__dg.amaral06/" target="_blank" class="footer-link">
+        <div class="footer-icon" style="color: #8B9BB4;">
+            {instagram_svg}
+        </div>
+        <span>Instagram do Desenvolvedor: @__dg.amaral06</span>
+    </a>
+</div>
+"""
+
+st.markdown(footer_html, unsafe_allow_html=True)
