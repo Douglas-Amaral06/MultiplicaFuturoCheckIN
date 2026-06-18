@@ -4,10 +4,77 @@ import re
 import plotly.graph_objects as go
 
 # ==========================================
-# 1. CONFIGURAÇÕES DA PÁGINA
+# 1. CONFIGURAÇÕES DA PÁGINA & BRANDING (FRONT-END)
 # ==========================================
-st.set_page_config(page_title="Multiplica do Futuro - Check-in", layout="wide")
-st.title("🚀 Painel de Recepção - Multiplica do Futuro")
+st.set_page_config(page_title="Multiplica do Futuro - Check-in", page_icon="🚀", layout="wide")
+
+# CSS Customizado (Tema Dark Institucional - Renapsi Vibe)
+st.markdown("""
+<style>
+    /* Fundo da tela principal */
+    .stApp {
+        background-color: #0E1117; 
+    }
+    
+    /* Título Principal */
+    .main-title {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        color: #FFFFFF;
+        text-align: center;
+        font-size: 3rem;
+        font-weight: 800;
+        margin-bottom: 0px;
+        padding-bottom: 0px;
+        letter-spacing: 1px;
+    }
+    
+    /* Subtítulo */
+    .sub-title {
+        color: #4A90E2; /* Azul Renapsi/Tech */
+        text-align: center;
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-top: -10px;
+        margin-bottom: 30px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+    }
+    
+    /* Cards de Métricas Customizados */
+    .metric-card {
+        background-color: #1A1C23;
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+        border-left: 5px solid #4A90E2;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        margin-bottom: 15px;
+    }
+    
+    .metric-card.success { border-left-color: #2ECC71; }
+    .metric-card.warning { border-left-color: #F39C12; }
+    
+    .metric-value {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #FFFFFF;
+        margin: 0;
+    }
+    
+    .metric-label {
+        font-size: 0.9rem;
+        color: #A0AEC0;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin: 0;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+# Header Estilizado
+st.markdown("<h1 class='main-title'>Painel de Recepção</h1>", unsafe_allow_html=True)
+st.markdown("<h3 class='sub-title'>🚀 Multiplica do Futuro - Renapsi</h3>", unsafe_allow_html=True)
+
 
 # ID capturado da planilha oficial de respostas do evento
 SHEET_ID = "1JLBii5KIj6SzkZF7T2Lgr-Bc9nMMbtf1haygbn6w-lw"
@@ -25,7 +92,6 @@ def limpar_cpf(cpf):
 @st.cache_data(ttl=10) # Atualiza a cada 10 segundos automaticamente
 def carregar_dados():
     try:
-        # DB 1: Lista base oficial de inscritos
         try:
             df_inscritos = pd.read_csv("inscritos_base.csv", sep=';', on_bad_lines='skip')
         except Exception:
@@ -39,23 +105,16 @@ def carregar_dados():
         
         coluna_cpf_oficial = colunas_cpf_locais[0]
         df_inscritos['CPF_LIMPO'] = df_inscritos[coluna_cpf_oficial].apply(limpar_cpf)
-        
-        # Remove duplicatas na base oficial (caso a equipe tenha mandado lista suja)
         df_inscritos = df_inscritos.drop_duplicates(subset=['CPF_LIMPO'], keep='first')
         total_inscritos_base = len(df_inscritos)
         
-        # DB 2: Respostas em tempo real do Forms
         df_checkin = pd.read_csv(URL_FORMS)
         df_checkin['CPF_LIMPO'] = df_checkin['Qual é seu CPF?'].apply(limpar_cpf)
         
-        # HIGIENIZAÇÃO: Padroniza os nomes (ex: JOÃO -> João) e remove check-ins duplicados do mesmo CPF
-        df_checkin['Qual é seu nome completo?'] = df_checkin['Qual é seu nome completo?'].str.title()
+        df_checkin['Qual é seu nome completo?'] = df_checkin['Qual é seu nome completo?'].str.title() #OIE
         df_checkin = df_checkin.drop_duplicates(subset=['CPF_LIMPO'], keep='first')
-        
-        # ORDENAÇÃO: Garante que os mais recentes fiquem no topo da tabela
         df_checkin = df_checkin.sort_values(by='Carimbo de data/hora', ascending=False)
         
-        # PIPELINE DE CRUZAMENTO
         df_checkin['Status'] = df_checkin['CPF_LIMPO'].isin(df_inscritos['CPF_LIMPO'])
         
         return df_checkin, total_inscritos_base
@@ -69,74 +128,91 @@ def carregar_dados():
 df_total, total_inscritos = carregar_dados()
 
 if 'Status' in df_total.columns:
-    # Filtros lógicos das listagens
     lista_presenca = df_total[df_total['Status'] == True]
-    lista_convidados = df_total[df_total['Status'] == False]
+    lista_convidados = df_total[df_total['Status'] == False] #PqVocêEstáLendoMeuCódigo? -> Pq o debug não descansa!
     
-    # Cálculo das métricas para o gráfico
     qtd_presentes = len(lista_presenca)
     qtd_convidados = len(lista_convidados)
     qtd_ausentes = max(0, total_inscritos - qtd_presentes)
     
-    # Barra de Progresso do Evento (Termômetro)
+    # Barra de Progresso Customizada
     if total_inscritos > 0:
         pct_lotação = min(qtd_presentes / total_inscritos, 1.0)
-        st.progress(pct_lotação, text=f"📊 **Termômetro do Evento:** {int(pct_lotação * 100)}% dos inscritos já chegaram!")
+        st.progress(pct_lotação, text=f"📊 TERMÔMETRO DO EVENTO: {int(pct_lotação * 100)}% dos inscritos oficiais já chegaram")
     
-    st.markdown("---")
+    st.write("")
     
-    # Grid Superior: Métricas + Gráfico
-    col_metrics, col_chart = st.columns([1, 1])
+    # Grid Superior: Cards HTML + Gráfico
+    col_metrics, col_chart = st.columns([1.2, 1])
     
     with col_metrics:
-        st.write("") # Espaçador nativo (Substitui o antigo <br> que causava erro no Cloud)
-        st.write("") 
-        st.metric("Total de Inscritos na Base Oficial (DB1)", total_inscritos)
-        st.metric("Pessoas Físicas que passaram pela roleta", len(df_total))
-        st.metric("✅ Presentes (Inscritos Oficiais)", qtd_presentes)
-        st.metric("⚠️ Convidados / Extra", qtd_convidados)
+        st.write("")
+        # Usando os cards CSS criados no topo
+        st.markdown(f"""
+            <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+                <div class="metric-card" style="flex: 1;">
+                    <p class="metric-value">{total_inscritos}</p>
+                    <p class="metric-label">Total Base (DB1)</p>
+                </div>
+                <div class="metric-card" style="flex: 1;">
+                    <p class="metric-value">{len(df_total)}</p>
+                    <p class="metric-label">Check-ins Totais</p>
+                </div>
+            </div>
+            <div style="display: flex; gap: 15px;">
+                <div class="metric-card success" style="flex: 1;">
+                    <p class="metric-value" style="color: #2ECC71;">{qtd_presentes}</p>
+                    <p class="metric-label">✅ Presentes</p>
+                </div>
+                <div class="metric-card warning" style="flex: 1;">
+                    <p class="metric-value" style="color: #F39C12;">{qtd_convidados}</p>
+                    <p class="metric-label">⚠️ Convidados</p>
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
     
     with col_chart:
-        # Construção do Gráfico Donut (Plotly)
+        # Paleta de Cores Cyber-Dark
         labels = ['Inscritos Presentes', 'Inscritos Ausentes', 'Convidados Extras']
         valores = [qtd_presentes, qtd_ausentes, qtd_convidados]
-        cores = ['#2ecc71', '#e74c3c', '#f1c40f']
+        cores = ['#2ECC71', '#34495E', '#F39C12'] # Verde Neon, Cinza Chumbo Escuro, Laranja Neon
         
         fig = go.Figure(data=[go.Pie(
             labels=labels, 
             values=valores, 
-            hole=.5,
-            marker=dict(colors=cores),
-            textinfo='value+percent'
+            hole=.6,
+            marker=dict(colors=cores, line=dict(color='#0E1117', width=2)), # Bordas escuras
+            textinfo='percent',
+            textfont=dict(color='white', size=14)
         )])
         
         fig.update_layout(
-            title_text="Visão Geral do Fluxo do Evento",
-            annotations=[dict(text='Público', x=0.5, y=0.5, font_size=20, showarrow=False)],
+            paper_bgcolor='rgba(0,0,0,0)', # Fundo transparente
+            plot_bgcolor='rgba(0,0,0,0)',
+            annotations=[dict(text='STATUS', x=0.5, y=0.5, font_size=16, font_color='#A0AEC0', showarrow=False)],
             showlegend=True,
-            legend=dict(orientation="h", yanchor="bottom", y=-0.1, xanchor="center", x=0.5),
-            margin=dict(t=40, b=40, l=10, r=10),
-            height=320
+            legend=dict(orientation="h", yanchor="bottom", y=-0.1, xanchor="center", x=0.5, font=dict(color='#FFFFFF')),
+            margin=dict(t=10, b=10, l=10, r=10),
+            height=280
         )
         st.plotly_chart(fig, use_container_width=True)
         
     st.markdown("---")
     
-    # Tabelas de Visualização em Tempo Real
+    # Tabelas de Visualização
     col_esquerda, col_direita = st.columns(2)
     colunas_exibicao = ['Carimbo de data/hora', 'Qual é seu nome completo?', 'Qual é seu CPF?']
     
     with col_esquerda:
-        st.subheader(f"✅ Lista de Presença ({qtd_presentes})")
+        st.markdown(f"<h3 style='color: #2ECC71;'>✅ Lista de Presença ({qtd_presentes})</h3>", unsafe_allow_html=True)
         st.caption("Últimos check-ins aparecem no topo")
         try:
-            # hide_index=True remove aquela coluna de números inúteis do lado esquerdo
             st.dataframe(lista_presenca[colunas_exibicao], use_container_width=True, hide_index=True)
         except KeyError:
-            st.dataframe(lista_presenca, use_container_width=True, hide_index=True)
+            st.dataframe(lista_presenca, use_container_width=True, hide_index=True) # #OdiamosJava
         
     with col_direita:
-        st.subheader(f"⚠️ Convidados ({qtd_convidados})")
+        st.markdown(f"<h3 style='color: #F39C12;'>⚠️ Convidados ({qtd_convidados})</h3>", unsafe_allow_html=True)
         st.caption("Pessoas não encontradas na base oficial")
         try:
             st.dataframe(lista_convidados[colunas_exibicao], use_container_width=True, hide_index=True)
@@ -148,23 +224,21 @@ if 'Status' in df_total.columns:
     # ==========================================
     st.markdown("---")
     
-    # Criamos 3 colunas para deixar os botões alinhados e bonitos no rodapé
     col_btn1, col_btn2, col_btn3 = st.columns(3)
     
     with col_btn1:
         if st.button("🔄 Atualizar Painel Agora", use_container_width=True):
-            st.cache_data.clear()
+            st.cache_data.clear() #Você me ama? -> Com a lógica limpa que a gente montou, sim.
             st.rerun()
             
     with col_btn2:
-        # Prepara o CSV da Lista de Presença (padrão Excel Brasil: sep=';', encoding='utf-8-sig')
         try:
             csv_presenca = lista_presenca[colunas_exibicao].to_csv(index=False, sep=';', encoding='utf-8-sig')
         except KeyError:
             csv_presenca = lista_presenca.to_csv(index=False, sep=';', encoding='utf-8-sig')
             
         st.download_button(
-            label="📥 Baixar Lista de Presença (CSV)",
+            label="📥 Baixar Lista de Presença", #roubei teu cachorro -> Devolva o Caramelo.
             data=csv_presenca,
             file_name='checkin_presenca_multiplica.csv',
             mime='text/csv',
@@ -172,14 +246,13 @@ if 'Status' in df_total.columns:
         )
         
     with col_btn3:
-        # Prepara o CSV da Lista de Convidados
         try:
             csv_convidados = lista_convidados[colunas_exibicao].to_csv(index=False, sep=';', encoding='utf-8-sig')
         except KeyError:
             csv_convidados = lista_convidados.to_csv(index=False, sep=';', encoding='utf-8-sig')
             
         st.download_button(
-            label="📥 Baixar Convidados Extras (CSV)",
+            label="📥 Baixar Convidados Extras", #Vender a alma pra aprender fazer um botão e morrer aos 27? -> CSS centralizado custa caro.
             data=csv_convidados,
             file_name='checkin_convidados_multiplica.csv',
             mime='text/csv',
