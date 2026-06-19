@@ -464,9 +464,6 @@ def carregar_dados():
         df_checkin = df_checkin.sort_values(by='Carimbo de data/hora', ascending=False)
         
         df_checkin['Status'] = df_checkin['CPF_LIMPO'].isin(df_inscritos['CPF_LIMPO'])
-
-        df_checkin["Qual sua data de nascimento?"] = df_checkin['Qual sua data de nascimento?'].str.title()
-       
         
         return df_checkin, total_inscritos_base
     except Exception as e:
