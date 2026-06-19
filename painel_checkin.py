@@ -279,79 +279,6 @@ st.markdown(f"""
         background-attachment: fixed;
     }}
 
-
-
-    /* ========================================= */
-    /* NOVO: FEATURE 3 - Tooltips nos Cards */
-    /* ========================================= */
-    .metric-card[title] {{
-        cursor: help;
-    }}
-
-    .tooltip-custom {{
-        position: relative;
-    }}
-
-    .tooltip-custom:hover::after {{
-        content: attr(data-tooltip);
-        position: absolute;
-        bottom: 110%;
-        left: 50%;
-        transform: translateX(-50%);
-        background: rgba(0, 0, 0, 0.9);
-        color: #00E5FF;
-        padding: 8px 12px;
-        border-radius: 6px;
-        font-size: 0.8rem;
-        white-space: nowrap;
-        z-index: 1000;
-        border: 1px solid rgba(0, 229, 255, 0.3);
-        font-family: 'Poppins', sans-serif;
-        pointer-events: none;
-    }}
-
-    /* ========================================= */
-    /* NOVO: FEATURE 4 - Animação de Entrada (Fade-In e Slide-Up) */
-    /* ========================================= */
-    @keyframes fadeInSlideUp {{
-        from {{
-            opacity: 0;
-            transform: translateY(30px);
-        }}
-        to {{
-            opacity: 1;
-            transform: translateY(0);
-        }}
-    }}
-
-    .data-table {{
-        animation: fadeInSlideUp 0.8s ease-out forwards;
-    }}
-
-    .plotly-chart {{
-        animation: fadeInSlideUp 1s ease-out forwards;
-    }}
-
-    /* ========================================= */
-    /* NOVO: FEATURE 5 - Efeito Data Matrix no Background dos Cards */
-    /* ========================================= */
-    .metric-card {{
-        background-image: 
-            linear-gradient(0deg, transparent 24%, rgba(0, 229, 255, 0.03) 25%, rgba(0, 229, 255, 0.03) 26%, transparent 27%, transparent 74%, rgba(0, 229, 255, 0.03) 75%, rgba(0, 229, 255, 0.03) 76%, transparent 77%, transparent),
-            linear-gradient(90deg, transparent 24%, rgba(0, 229, 255, 0.03) 25%, rgba(0, 229, 255, 0.03) 26%, transparent 27%, transparent 74%, rgba(0, 229, 255, 0.03) 75%, rgba(0, 229, 255, 0.03) 76%, transparent 77%, transparent);
-        background-size: 60px 60px;
-        background-position: 0 0;
-        opacity: 1;
-        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }}
-
-    .metric-card:hover {{
-        background-image: 
-            linear-gradient(0deg, transparent 24%, rgba(0, 229, 255, 0.08) 25%, rgba(0, 229, 255, 0.08) 26%, transparent 27%, transparent 74%, rgba(0, 229, 255, 0.08) 75%, rgba(0, 229, 255, 0.08) 76%, transparent 77%, transparent),
-            linear-gradient(90deg, transparent 24%, rgba(0, 229, 255, 0.08) 25%, rgba(0, 229, 255, 0.08) 26%, transparent 27%, transparent 74%, rgba(0, 229, 255, 0.08) 75%, rgba(0, 229, 255, 0.08) 76%, transparent 77%, transparent);
-        background-size: 60px 60px;
-    }}
-
     /* ========================================= */
     /* NOVO: FOOTER - Rodapé Customizado com Links e SVG */
     /* ========================================= */
@@ -399,7 +326,6 @@ st.markdown(f"""
         filter: drop-shadow(0 0 6px rgba(0, 229, 255, 0.8)) drop-shadow(0 0 12px rgba(0, 229, 255, 0.4));
     }}
 
-    /* NOVO: SVG do footer com cor dinâmica no hover */
     .footer-icon svg {{
         stroke: #8B9BB4;
         transition: all 0.3s ease;
@@ -459,12 +385,50 @@ def carregar_dados():
         df_checkin = pd.read_csv(URL_FORMS)
         df_checkin['CPF_LIMPO'] = df_checkin['Qual é seu CPF?'].apply(limpar_cpf)
         
-        df_checkin['Qual é seu nome completo?'] = df_checkin['Qual é seu nome completo?'].str.title()
-        df_checkin['Qual sua data de nascimento?'] = df_checkin['Qual sua data de nascimento?'].str.title()
+        df_checkin['Qual é seu nome completo?'] = df_checkin['Qual é seu nome completo?'].str.title() 
         df_checkin = df_checkin.drop_duplicates(subset=['CPF_LIMPO'], keep='first')
         df_checkin = df_checkin.sort_values(by='Carimbo de data/hora', ascending=False)
         
+        # PIPELINE DE CRUZAMENTO: Define o Status
         df_checkin['Status'] = df_checkin['CPF_LIMPO'].isin(df_inscritos['CPF_LIMPO'])
+        
+        # =================================================================
+        # NOVO: ENRIQUECIMENTO DE PIPELINE - Mapeamento da Data de Nascimento
+        # =================================================================
+        # 1. Identifica as colunas de nascimento em ambos os bancos
+        coluna_nasc_db1 = next((col for col in df_inscritos.columns if 'nascimento' in col.lower()), None)
+        coluna_nasc_db2 = next((col for col in df_checkin.columns if 'nascimento' in col.lower()), None)
+        
+        # 2. Cria o dicionário de busca rápido para os inscritos (CPF -> Data de Nascimento)
+        dict_nascimento_db1 = {}
+        if coluna_nasc_db1:
+            dict_nascimento_db1 = df_inscritos.set_index('CPF_LIMPO')[coluna_nasc_db1].to_dict()
+
+        # 3. Função de inteligência para decidir de onde puxar a data e formatá-la
+        def consolidar_nascimento(row):
+            cpf = row['CPF_LIMPO']
+            is_oficial = row['Status']
+            data_forms = row[coluna_nasc_db2] if coluna_nasc_db2 and coluna_nasc_db2 in row else ""
+            
+            # Puxa do BD1 se for oficial, se não puxa a resposta que ele digitou no Forms
+            data_bruta = dict_nascimento_db1.get(cpf, data_forms) if is_oficial else data_forms
+            
+            # Higienização: limpa datas nulas e converte o padrão feio (2006-12-01 00:00:00) para DD/MM/YYYY
+            if pd.isna(data_bruta) or str(data_bruta).strip() in ["", "nan", "NaT"]:
+                return "Não informada"
+                
+            data_str = str(data_bruta).split()[0] # Corta a hora fora se houver
+            
+            # Se for padrão YYYY-MM-DD (Comum do banco DB1), converte para visual BR
+            if re.match(r'^\d{4}-\d{2}-\d{2}$', data_str):
+                partes = data_str.split('-')
+                return f"{partes[2]}/{partes[1]}/{partes[0]}"
+                
+            return data_str
+
+        # 4. Aplica a inteligência em uma nova coluna consolidada visual
+        df_checkin['Data de Nascimento'] = df_checkin.apply(consolidar_nascimento, axis=1)
+        # =================================================================
         
         return df_checkin, total_inscritos_base
     except Exception as e:
@@ -567,7 +531,17 @@ if 'Status' in df_total.columns:
     
     # Tabelas de Visualização
     col_esquerda, col_direita = st.columns(2)
-    colunas_exibicao = ['Carimbo de data/hora', 'Qual é seu nome completo?', 'Qual é seu CPF?']
+    
+    # ADICIONADO: A coluna "Data de Nascimento" agora compõe o array visual do site
+    colunas_exibicao = ['Carimbo de data/hora', 'Qual é seu nome completo?', 'Qual é seu CPF?', 'Data de Nascimento']
+    
+    # Configuração customizada das colunas para ajustar a largura e adicionar ícones na frente do texto do cabeçalho
+    config_tabela = {
+        "Carimbo de data/hora": st.column_config.TextColumn("🕒 Horário", width="medium"),
+        "Qual é seu nome completo?": st.column_config.TextColumn("👤 Nome do Participante", width="large"),
+        "Qual é seu CPF?": st.column_config.TextColumn("🔑 CPF", width="medium"),
+        "Data de Nascimento": st.column_config.TextColumn("📅 Nascimento", width="medium")
+    }
     
     # NOVO: FEATURE 1 - Aplicar filtro de busca nos dados
     if busca_termo:
@@ -589,9 +563,9 @@ if 'Status' in df_total.columns:
         # NOVO: FEATURE 4 - Animação de entrada para tabela de presença
         st.markdown('<div class="data-table">', unsafe_allow_html=True)
         try:
-            st.dataframe(lista_presenca_filtrada[colunas_exibicao], use_container_width=True, hide_index=True)
+            st.dataframe(lista_presenca_filtrada[colunas_exibicao], use_container_width=True, hide_index=True, column_config=config_tabela)
         except KeyError:
-            st.dataframe(lista_presenca_filtrada, use_container_width=True, hide_index=True) # #OdiamosJava 
+            st.dataframe(lista_presenca_filtrada, use_container_width=True, hide_index=True, column_config=config_tabela) 
         st.markdown('</div>', unsafe_allow_html=True)
         
     with col_direita:
@@ -600,9 +574,9 @@ if 'Status' in df_total.columns:
         # NOVO: FEATURE 4 - Animação de entrada para tabela de convidados
         st.markdown('<div class="data-table">', unsafe_allow_html=True)
         try:
-            st.dataframe(lista_convidados_filtrada[colunas_exibicao], use_container_width=True, hide_index=True)
+            st.dataframe(lista_convidados_filtrada[colunas_exibicao], use_container_width=True, hide_index=True, column_config=config_tabela)
         except KeyError:
-            st.dataframe(lista_convidados_filtrada, use_container_width=True, hide_index=True)
+            st.dataframe(lista_convidados_filtrada, use_container_width=True, hide_index=True, column_config=config_tabela)
         st.markdown('</div>', unsafe_allow_html=True)
         
     # ==========================================
@@ -638,7 +612,7 @@ if 'Status' in df_total.columns:
             csv_convidados = lista_convidados.to_csv(index=False, sep=';', encoding='utf-8-sig')
             
         st.download_button(
-            label="📥 Exportar Convidados Extras", # Vender a alma valeu a pena, o botão está lindo.
+            label="📥 Exportar Convidados Extras", 
             data=csv_convidados,
             file_name='checkin_convidados_multiplica.csv',
             mime='text/csv',
