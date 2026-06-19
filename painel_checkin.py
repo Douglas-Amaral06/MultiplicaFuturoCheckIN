@@ -67,6 +67,21 @@ st.markdown(f"""
         0% {{ text-shadow: 0 0 10px rgba(0, 229, 255, 0.2), 0 0 20px rgba(0, 229, 255, 0.2); }}
         50% {{ text-shadow: 0 0 15px rgba(0, 229, 255, 0.6), 0 0 30px rgba(0, 229, 255, 0.4); }}
         100% {{ text-shadow: 0 0 10px rgba(0, 229, 255, 0.2), 0 0 20px rgba(0, 229, 255, 0.2); }}
+
+        /* Easter Egg: Botão invisível do Vampeta */
+    .vampeta-btn {
+        position: fixed;
+        bottom: 5px;
+        right: 5px;
+        width: 15px;
+        height: 15px;
+        background: transparent;
+        border: none;
+        outline: none;
+        cursor: pointer;
+        z-index: 9999;
+        opacity: 0;
+    }
     }}
 
     /* Layout do Topo */
@@ -627,7 +642,7 @@ else:
 # ==========================================
 st.markdown("---")
 
-# NOVO: FOOTER - Rodapé com links de Instagram e SVG inline
+# NOVO: FOOTER - Rodapé com links de Instagram, SVG inline e Easter Egg
 footer_html = """
 <div class="footer-container">
     <a href="https://www.instagram.com/multiplicafuturo/" target="_blank" class="footer-link">
@@ -650,6 +665,8 @@ footer_html = """
         </div>
         <span>Instagram do Desenvolvedor: @__dg.amaral06</span>
     </a>
+    
+    <a href="https://g1.globo.com/tecnologia/noticia/2025/07/16/vampetaco-x-tarifaco-entenda-trend-brasileira-que-enche-redes-de-trump-e-apoiadores-com-fotos-do-jogador.ghtml" target="_blank" class="vampeta-btn"></a>
 </div>
 """
 
