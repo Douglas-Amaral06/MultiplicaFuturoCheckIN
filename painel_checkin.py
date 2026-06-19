@@ -687,7 +687,7 @@ footer_html = """
 
 <!-- NOVO: EASTER EGG - Botão Vampeta no rodapé em cima do footer -->
 <div style="display: flex; justify-content: flex-start; padding: 10px 20px; background: rgba(10, 15, 30, 0.2);">
-    <a href="https://www.google.com/imgres?q=foto%20vampeta&imgurl=https%3A%2F%2Flookaside.instagram.com%2Fseo%2Fgoogle_widget%2Fcrawler%2F%3Fmedia_id%3D3733411422190467533&imgrefurl=https%3A%2F%2Fwww.instagram.com%2Fp%2FDPPveoOjPul%2F&docid=Mf0Ew9LLDxLp5M&tbnid=uwz_gyo9eq4VHM&vet=12ahUKEwiS8djrnZOVAxWEA7kGHXvtGgcQnPAOegQIUxAB..i&w=924&h=1225&hcb=2&ved=2ahUKEwiS8djrnZOVAxWEA7kGHXvtGgcQnPAOegQIUxAB" target="_blank" class="vampeta-easter-egg" title="Clique para ver a foto do Vampeta! 🧛">
+    <a href="https://www.google.com/imgres?q=foto%20vampeta&imgurl=https%3A%2F%2Flookaside.instagram.com%2Fseo%2Fgoogle_widget%2Fcrawler%2F%3Fmedia_id%3D3733411422190467533&imgrefurl=https%3A%2F%2Fwww.instagram.com%2Fp%2FDPPveoOjPul%2F&docid=Mf0Ew9LLDxLp5M&tbnid=uwz_gyo9eq4VHM&vet=12ahUKEwiS8djrnZOVAxWEA7kGHXvtGgcQnPAOegQIUxAB..i&w=924&h=1225&hcb=2&ved=2ahUKEwiS8djrnZOVAxWEA7kGHXvtGgcQnPAOegQIUxAB" target="_blank" class="vampeta-easter-egg" title="Não clique!!! Ou irá ver algo que irá te surpreender ! 🧛">
         🧛 Não clique
     </a>
 </div>
