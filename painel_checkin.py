@@ -459,7 +459,8 @@ def carregar_dados():
         df_checkin = pd.read_csv(URL_FORMS)
         df_checkin['CPF_LIMPO'] = df_checkin['Qual é seu CPF?'].apply(limpar_cpf)
         
-        df_checkin['Qual é seu nome completo?'] = df_checkin['Qual é seu nome completo?'].str.title() 
+        df_checkin['Qual é seu nome completo?'] = df_checkin['Qual é seu nome completo?'].str.title()
+        df_checkin['Qual sua data de nascimento?'] = df_checkin['Qual sua data de nascimento?'].str.title()
         df_checkin = df_checkin.drop_duplicates(subset=['CPF_LIMPO'], keep='first')
         df_checkin = df_checkin.sort_values(by='Carimbo de data/hora', ascending=False)
         
