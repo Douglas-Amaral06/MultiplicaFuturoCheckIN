@@ -5,7 +5,6 @@ import plotly.graph_objects as go
 import base64
 import os
 from datetime import datetime
-# NOVO: FEATURE 2 - Imports para efeitos sonoros
 import time
 
 # ==========================================
@@ -67,9 +66,10 @@ st.markdown(f"""
         0% {{ text-shadow: 0 0 10px rgba(0, 229, 255, 0.2), 0 0 20px rgba(0, 229, 255, 0.2); }}
         50% {{ text-shadow: 0 0 15px rgba(0, 229, 255, 0.6), 0 0 30px rgba(0, 229, 255, 0.4); }}
         100% {{ text-shadow: 0 0 10px rgba(0, 229, 255, 0.2), 0 0 20px rgba(0, 229, 255, 0.2); }}
+    }}
 
-        /* Easter Egg: Botão invisível do Vampeta */
-    .vampeta-btn {
+    /* Easter Egg: Botão invisível do Vampeta */
+    .vampeta-btn {{
         position: fixed;
         bottom: 5px;
         right: 5px;
@@ -81,7 +81,6 @@ st.markdown(f"""
         cursor: pointer;
         z-index: 9999;
         opacity: 0;
-    }
     }}
 
     /* Layout do Topo */
@@ -365,7 +364,6 @@ st.markdown(f"""
     </div>
 """, unsafe_allow_html=True)
 
-
 # ID capturado da planilha oficial de respostas do evento
 SHEET_ID = "1JLBii5KIj6SzkZF7T2Lgr-Bc9nMMbtf1haygbn6w-lw"
 URL_FORMS = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/export?format=csv"
@@ -642,7 +640,7 @@ else:
 # ==========================================
 st.markdown("---")
 
-# NOVO: FOOTER - Rodapé com links de Instagram, SVG inline e Easter Egg
+# NOVO: FOOTER - Rodapé com links de Instagram e SVG inline e botão Vampetaço
 footer_html = """
 <div class="footer-container">
     <a href="https://www.instagram.com/multiplicafuturo/" target="_blank" class="footer-link">
@@ -666,7 +664,7 @@ footer_html = """
         <span>Instagram do Desenvolvedor: @__dg.amaral06</span>
     </a>
     
-    <a href="https://g1.globo.com/tecnologia/noticia/2025/07/16/vampetaco-x-tarifaco-entenda-trend-brasileira-que-enche-redes-de-trump-e-apoiadores-com-fotos-do-jogador.ghtml" target="_blank" class="vampeta-btn"></a>
+    <a href="https://g1.globo.com/tecnologia/noticia/2025/07/16/vampetaco-x-tarifaco-entenda-trend-brasileira-que-enche-redes-de-trump-e-apoiadores-com-fotos-do-jogador.ghtml" target="_blank" class="vampeta-btn" title=" "></a>
 </div>
 """
 
