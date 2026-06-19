@@ -338,28 +338,35 @@ st.markdown(f"""
     /* NOVO: EASTER EGG - Botão Vampeta Invisível */
     /* ========================================= */
     .vampeta-easter-egg {{
-        position: fixed;
-        bottom: 15px;
-        right: 15px;
-        width: 20px;
-        height: 20px;
-        background: transparent;
-        border: 2px solid transparent;
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 16px;
+        margin-top: 20px;
+        margin-right: auto;
+        background: rgba(139, 155, 180, 0.15);
+        border: 2px solid rgba(139, 155, 180, 0.4);
+        border-radius: 8px;
         cursor: pointer;
-        opacity: 0;
-        z-index: 9999;
+        text-decoration: none;
+        color: #8B9BB4;
+        font-family: 'Poppins', sans-serif;
+        font-size: 0.9rem;
+        font-weight: 500;
         transition: all 0.3s ease;
-        border-radius: 4px;
     }}
 
     .vampeta-easter-egg:hover {{
-        opacity: 0.15;
-        border-color: rgba(0, 229, 255, 0.3);
-        background: rgba(0, 229, 255, 0.05);
+        background: rgba(139, 155, 180, 0.3);
+        border-color: rgba(0, 229, 255, 0.6);
+        color: #00E5FF;
+        text-shadow: 0 0 8px rgba(0, 229, 255, 0.5);
+        transform: translateY(-2px);
     }}
 
     .vampeta-easter-egg:active {{
-        transform: scale(0.95);
+        transform: translateY(0);
     }}
 
 </style>
@@ -678,8 +685,12 @@ footer_html = """
     </a>
 </div>
 
-<!-- NOVO: EASTER EGG - Botão invisível do Vampeta no canto inferior direito -->
-<a href="https://g1.globo.com/tecnologia/noticia/2025/07/16/vampetaco-x-tarifaco-entenda-trend-brasileira-que-enche-redes-de-trump-e-apoiadores-com-fotos-do-jogador.ghtml" target="_blank" class="vampeta-easter-egg" title="🧛 Encontre o Vampeta!"></a>
+<!-- NOVO: EASTER EGG - Botão Vampeta no rodapé em cima do footer -->
+<div style="display: flex; justify-content: flex-start; padding: 10px 20px; background: rgba(10, 15, 30, 0.2);">
+    <a href="https://g1.globo.com/tecnologia/noticia/2025/07/16/vampetaco-x-tarifaco-entenda-trend-brasileira-que-enche-redes-de-trump-e-apoiadores-com-fotos-do-jogador.ghtml" target="_blank" class="vampeta-easter-egg" title="Clique para ver a foto do Vampeta! 🧛">
+        🧛 Vampetaço
+    </a>
+</div>
 """
 
 st.markdown(footer_html, unsafe_allow_html=True)
