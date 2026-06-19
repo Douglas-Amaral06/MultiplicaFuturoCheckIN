@@ -688,7 +688,7 @@ footer_html = """
 <!-- NOVO: EASTER EGG - Botão Vampeta no rodapé em cima do footer -->
 <div style="display: flex; justify-content: flex-start; padding: 10px 20px; background: rgba(10, 15, 30, 0.2);">
     <a href="https://g1.globo.com/tecnologia/noticia/2025/07/16/vampetaco-x-tarifaco-entenda-trend-brasileira-que-enche-redes-de-trump-e-apoiadores-com-fotos-do-jogador.ghtml" target="_blank" class="vampeta-easter-egg" title="Clique para ver a foto do Vampeta! 🧛">
-        🧛 Vampetaço
+        🧛 Não clique
     </a>
 </div>
 """
