@@ -334,6 +334,34 @@ st.markdown(f"""
         stroke: #00E5FF;
     }}
 
+    /* ========================================= */
+    /* NOVO: EASTER EGG - Botão Vampeta Invisível */
+    /* ========================================= */
+    .vampeta-easter-egg {{
+        position: fixed;
+        bottom: 15px;
+        right: 15px;
+        width: 20px;
+        height: 20px;
+        background: transparent;
+        border: 2px solid transparent;
+        cursor: pointer;
+        opacity: 0;
+        z-index: 9999;
+        transition: all 0.3s ease;
+        border-radius: 4px;
+    }}
+
+    .vampeta-easter-egg:hover {{
+        opacity: 0.15;
+        border-color: rgba(0, 229, 255, 0.3);
+        background: rgba(0, 229, 255, 0.05);
+    }}
+
+    .vampeta-easter-egg:active {{
+        transform: scale(0.95);
+    }}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -649,6 +677,9 @@ footer_html = """
         <span>Instagram do Desenvolvedor: @__dg.amaral06</span>
     </a>
 </div>
+
+<!-- NOVO: EASTER EGG - Botão invisível do Vampeta no canto inferior direito -->
+<a href="https://g1.globo.com/tecnologia/noticia/2025/07/16/vampetaco-x-tarifaco-entenda-trend-brasileira-que-enche-redes-de-trump-e-apoiadores-com-fotos-do-jogador.ghtml" target="_blank" class="vampeta-easter-egg" title="🧛 Encontre o Vampeta!"></a>
 """
 
 st.markdown(footer_html, unsafe_allow_html=True)
